@@ -31,6 +31,11 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+// adding route for /urls/new
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
+});
+
 //adding route for /urls:shortURL -- this renders information about a single URL
 app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL
