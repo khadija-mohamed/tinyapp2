@@ -43,9 +43,6 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-});
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
@@ -59,7 +56,7 @@ app.get("/hello", (req, res) => {
 app.get("/urls", (req, res) => {
   let templateVars = { 
     urls: urlDatabase,
-    username: req.cookies["username"]};
+    user: users[req.cookies["user_id"]]};
   res.render("urls_index", templateVars);
 });
 
@@ -67,7 +64,7 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
     let templateVars = { 
       urls: urlDatabase,
-      username: req.cookies["username"]};
+      user: users[req.cookies["user_id"]]}
   res.render("urls_new", templateVars);
 });
 
@@ -77,7 +74,7 @@ app.get("/urls/:shortURL", (req, res) => {
   let templateVars = { 
     shortURL: req.params.shortURL, 
     longURL: urlDatabase[shortURL],
-    username: req.cookies["username"]};
+    user: users[req.cookies["user_id"]]};
   res.render("urls_show", templateVars);
 });
 
@@ -95,18 +92,18 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
-//post route to remove URL resource
-app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL];
-  res.redirect(`/urls`)
-});
-
 // post route to update a URL resource 
 app.post("/urls/:id", (req, res) => {
   let longURL = req.body.longURL
   urlDatabase[req.params.id] = longURL 
   console.log(urlDatabase)
   res.redirect(`/urls`);
+});
+
+//post route to remove URL resource
+app.post("/urls/:shortURL/delete", (req, res) => {
+  delete urlDatabase[req.params.shortURL];
+  res.redirect(`/urls`)
 });
 
 // adding endpoint to handle post for LOGIN
@@ -124,7 +121,7 @@ app.post("/logout", (req, res) => {
 // get for /register - display registration form 
 app.get("/register", (req, res) => {
   const templateVars = { 
-    username: req.cookies['username'] }
+    user: users[req.cookies["user_id"]]}
   res.render("urls_register", templateVars)
   });
 
@@ -134,7 +131,7 @@ app.post("/register", (req, res) => {
   users[userID] = { 
     email: req.body.email, 
     password: req.body.password, 
-    id: userID};
+    userID};
 
   if (req.body.email &&  req.body.password) {
     res.status(400).send("string");
@@ -142,7 +139,11 @@ app.post("/register", (req, res) => {
   if (getUserFromEmail(email)) {
     res.status(400).send("STRNG");
   }
-  res.cookie('user_id', users)
+  res.cookie('user_id', userID)
   res.redirect(`/urls`);
 });
 
+
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
+});

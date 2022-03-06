@@ -11,7 +11,7 @@
           <% if(username){ %>
             <form action='/logout' method="post">
               <label form="name"> Logged In As :<%= username %></label>
-              <button type="submit" class="btn btn-outline-dark" style="margin: 0.5rem;">Logout</button>
+              <button type="submit" class="btn btn-outline-dark">Logout</button>
               <% } else{ %>
                 <form action='/login' method="post">
                   <input type="text" name="username" id="username">
