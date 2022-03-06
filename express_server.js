@@ -50,6 +50,7 @@ app.get("/urls/:shortURL", (req, res) => {
 //post for /urls 
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
+  const longURL = req.params.shortURL
   urlDatabase[shortURL] = longURL 
   res.redirect(`/urls/${shortURL}`)
 });
@@ -64,6 +65,14 @@ app.get("/u/:shortURL", (req, res) => {
 app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[req.params.shortURL];
   res.redirect(`/urls`)
+});
+
+// post route to update a URL resource 
+app.post("/urls/:id", (req, res) => {
+  let longURL = req.body.longURL
+  urlDatabase[req.params.id] = longURL 
+  console.log(urlDatabase)
+  res.redirect(`/urls`);
 });
 
 // generate a randomized alphanumeric character for the unique shortURL.
