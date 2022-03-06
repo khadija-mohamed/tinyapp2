@@ -1,12 +1,12 @@
 const express = require("express");
 const app = express();
 const PORT = 8080;
-
-//body parser library, converts request body from buffer into readble string. 
 const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({extended: true}));
+const cookieParser = require("cookie-parser");
 
 app.set("view engine", "ejs");
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser());
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -31,19 +31,27 @@ app.get("/hello", (req, res) => {
 
 // adding route for /urls
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase };
+  let templateVars = { 
+    urls: urlDatabase,
+    username: req.cookies["username"]};
   res.render("urls_index", templateVars);
 });
 
 // adding route for /urls/new
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+    let templateVars = { 
+      urls: urlDatabase,
+      username: req.cookies["username"]};
+  res.render("urls_new", templateVars);
 });
 
 //adding route for /urls:shortURL -- this renders information about a single URL
 app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL
-  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[shortURL]};
+  let templateVars = { 
+    shortURL: req.params.shortURL, 
+    longURL: urlDatabase[shortURL],
+    username: req.cookies["username"]};
   res.render("urls_show", templateVars);
 });
 
@@ -74,6 +82,18 @@ app.post("/urls/:id", (req, res) => {
   console.log(urlDatabase)
   res.redirect(`/urls`);
 });
+
+// adding endpoint to handle post for LOGIN
+app.post("/login", (req, res) => {
+  res.cookie('username', req.body.username)
+  res.redirect(`/urls`);
+});
+
+//adding /logout endpoint that clears username cookie and redirects
+app.post("/logout", (req, res) => {
+  res.clearCookie('username')
+  res.redirect(`/urls`)
+})
 
 // generate a randomized alphanumeric character for the unique shortURL.
 const generateRandomString = function() {
