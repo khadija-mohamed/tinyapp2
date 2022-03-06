@@ -13,6 +13,32 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+// generate a randomized alphanumeric character for the unique shortURL.
+const generateRandomString = function() {
+  let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = ""
+  let charactersLength = characters.length;
+  for (let i = 0; i < 5; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+}
+return result
+}
+console.log(generateRandomString(5));
+
+// global object called users - to store and access users
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -95,14 +121,28 @@ app.post("/logout", (req, res) => {
   res.redirect(`/urls`)
 })
 
-// generate a randomized alphanumeric character for the unique shortURL.
-const generateRandomString = function() {
-  let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = ""
-  let charactersLength = characters.length;
-  for (let i = 0; i < 5; i++) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-}
-return result
-}
-console.log(generateRandomString(5));
+// get for /register - display registration form 
+app.get("/register", (req, res) => {
+  const templateVars = { 
+    username: req.cookies['username'] }
+  res.render("urls_register", templateVars)
+  });
+
+// post for /register endpoint
+app.post("/register", (req, res) => {
+  const userID = generateRandomString();
+  users[userID] = { 
+    email: req.body.email, 
+    password: req.body.password, 
+    id: userID};
+
+  if (req.body.email &&  req.body.password) {
+    res.status(400).send("string");
+  }
+  if (getUserFromEmail(email)) {
+    res.status(400).send("STRNG");
+  }
+  res.cookie('user_id', users)
+  res.redirect(`/urls`);
+});
+
