@@ -46,7 +46,7 @@ const users = {
   "userRandomID": {
     id: "userRandomID", 
     email: "user@example.com", 
-    password: bcrypt.hashSync(password, 10)
+    password: "dishwasher-funk"
   },
  "user2RandomID": {
     id: "user2RandomID", 
@@ -59,7 +59,7 @@ const users = {
 app.get("/urls", (req, res) => {
   let templateVars = { 
     urls: urlDatabase,
-    user: users[req.cookies["user_id"]]};
+    user: users[req.session["user_id"]]};
   res.render("urls_index", templateVars);
 });
 
@@ -67,7 +67,7 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
     let templateVars = { 
       urls: urlDatabase,
-      user: users[req.cookies["user_id"]]}
+      user: users[req.session["user_id"]]}
   res.render("urls_new", templateVars);
 });
 
@@ -77,7 +77,7 @@ app.get("/urls/:shortURL", (req, res) => {
   let templateVars = { 
     shortURL: req.params.shortURL, 
     longURL: urlDatabase[shortURL],
-    user: users[req.cookies["user_id"]]};
+    user: users[req.session["user_id"]]};
   res.render("urls_show", templateVars);
 });
 
@@ -112,7 +112,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 //get /login
 app.get("/login", (req, res) => {
   const templateVars = { 
-    user: users[req.cookies["user_id"]]}
+    user: users[req.session["user_id"]]}
   res.render("urls_login", templateVars)
   });
 
@@ -122,16 +122,16 @@ app.post("/login", (req, res) => {
   res.redirect(`/urls`);
 });
 
-//adding /logout endpoint that clears username cookie and redirects
+//adding /logout endpoint that clears cookie and redirects
 app.post("/logout", (req, res) => {
-  res.clearCookie('user_id', users[req.cookies["user_id"]])
+  res.clearCookie('user_id', users[req.session["user_id"]])
   res.redirect(`/urls`)
 })
 
 // get for /register - display registration form 
 app.get("/register", (req, res) => {
   const templateVars = { 
-    user: users[req.cookies["user_id"]]}
+    user: users[req.session["user_id"]]}
   res.render("urls_register", templateVars)
   });
 
