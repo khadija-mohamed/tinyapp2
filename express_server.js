@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
+const bcrypt = require('bcryptjs')
 
 const app = express();
 const PORT = 8080;
@@ -41,7 +42,7 @@ const users = {
   "userRandomID": {
     id: "userRandomID", 
     email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
+    password: bcrypt.hashSync(password, 10)
   },
  "user2RandomID": {
     id: "user2RandomID", 
