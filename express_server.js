@@ -2,39 +2,18 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cookieSession = require("cookie-session");
 const bcrypt = require('bcryptjs')
-
 const app = express();
 const PORT = 8080;
+const { getUserByEmail, generateRandomString } = require('./helpers');
 
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
 
-app.use(cookieSession({
+app.use(cookieSession ({
   name: 'session',
-  keys: [/* secret keys */]
-}));
-
-// generate a randomized alphanumeric character for the unique shortURL.
-const generateRandomString = function() {
-  let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = ""
-  let charactersLength = characters.length;
-  for (let i = 0; i < 5; i++) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-}
-return result
-}
-console.log(generateRandomString(5));
-
-//Register helper function helper function for register route
-const existingUser = function(userDatabase, email) {
-  for (const user in users) {
-    if (users[user].email === email) {
-      return true
-      return users[user].id
-    }
-  } return false;
-};
+  keys: ['key1', 'key2'],
+})
+);
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -46,42 +25,40 @@ const users = {
   "userRandomID": {
     id: "userRandomID", 
     email: "user@example.com", 
-    password: "dishwasher-funk"
-  },
- "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
-    password: "dishwasher-funk"
+    password: bcrypt.hashSync("password", 10)
   }
-}
+};
 
-// GET for /urls
+// adding GET route for /urls
 app.get("/urls", (req, res) => {
   let templateVars = { 
     urls: urlDatabase,
-    user: users[req.session["user_id"]]};
+    user: users[req.session.user_id]};
   res.render("urls_index", templateVars);
 });
 
-// GET for /urls/new
+// adding GET route for /urls/new
 app.get("/urls/new", (req, res) => {
     let templateVars = { 
       urls: urlDatabase,
-      user: users[req.session["user_id"]]}
-  res.render("urls_new", templateVars);
+      user: users[req.session.user_id]}
+      if (templateVars.user) {
+        res.render("urls_new", templateVars);
+      }
+      res.render("urls_login", templateVars);
 });
 
-//GET for /urls:shortURL -- this renders information about a single URL
+// adding GET route for /urls:shortURL -- this renders information about a single URL
 app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL
   let templateVars = { 
     shortURL: req.params.shortURL, 
     longURL: urlDatabase[shortURL],
-    user: users[req.session["user_id"]]};
+    user: users[req.session.user_id]};
   res.render("urls_show", templateVars);
 });
 
-//POST for /urls 
+// adding POST for /urls 
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
   const longURL = req.params.shortURL
@@ -89,13 +66,13 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`)
 });
 
-// GET to handle shortURL requests
+// adding GET route to handle shortURL requests
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL]
   res.redirect(longURL);
 });
 
-// post route to update a URL resource 
+// adding POST route to update a URL resource 
 app.post("/urls/:id", (req, res) => {
   let longURL = req.body.longURL
   urlDatabase[req.params.id] = longURL 
@@ -103,53 +80,68 @@ app.post("/urls/:id", (req, res) => {
   res.redirect(`/urls`);
 });
 
-//post route to remove URL resource
+// adding POST route to remove URL resource, deletes only when logged in, and if not returns error message
 app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL];
+  const shortURL = req.params.shortURL;
+  if (req.session.user_id ===  urlDatabase[shortURL].userID) {
+  }
+  delete urlDatabase[shortURL];
   res.redirect(`/urls`)
 });
 
-//get /login
+// adding GET route /login
 app.get("/login", (req, res) => {
   const templateVars = { 
-    user: users[req.session["user_id"]]}
+    user: users[req.session.user_id]}
   res.render("urls_login", templateVars)
   });
 
-// adding endpoint to handle post for LOGIN
+// adding POST route for /LOGIN
 app.post("/login", (req, res) => {
-  res.cookie('username', req.body.username)
+  const email = req.body.email;
+  const password = req.body.password;
+  if (!email || !password) {
+    res.status(403).send('ERROR 403: Email address or password is incorrect, please try again');
+  }
+  const user = getUserByEmail(users, email);
+  if (!user) {
+    res.status(400).send('ERROR 400: Email address is incorrect, please try again');
+  }
+  if (!bcrypt.compareSync(password, user.password)) {
+    res.status(400).send('ERROR 400: Password is incorrect, please try again');
+  }
+  req.session.user_id = user.userID;
   res.redirect(`/urls`);
 });
 
-//adding /logout endpoint that clears cookie and redirects
+// adding POST for Logout -- once logged out, clears session and redirects to login page
 app.post("/logout", (req, res) => {
-  res.clearCookie('user_id', users[req.session["user_id"]])
-  res.redirect(`/urls`)
-})
+  req.session.user_id = null;
+  res.redirect(`/login`);
+});
 
 // get for /register - display registration form 
 app.get("/register", (req, res) => {
   const templateVars = { 
-    user: users[req.session["user_id"]]}
+    user: users[req.session.user_id]}
   res.render("urls_register", templateVars)
   });
 
-// post for /register endpoint
+// post for /register endpoint with corresponding error messages, and redirections.
 app.post("/register", (req, res) => {
-  const userID = generateRandomString();
-  if (!req.body.email || !req.body.password) {
-    res.status(400).send('ERROR 400: Please enter valid email/password')
-  } else if (existingUser(users, req.body.email)) {
-    res.status(400).send('Error 400')
-  } else {
-  users[userID] = { 
-    email: req.body.email, 
-    password: req.body.password, 
-    id: userID};
+  const email = req.body.email;
+  const password = bcrypt.hashSync(req.body.password, 10);
+  if (!email || !password) {
+    res.status(400).send("ERROR 400: Email address or password entered is invalid, please try again");
   }
-  res.cookie('user_id', userID)
-  res.redirect(`/urls`);
+  if (!getUserByEmail(users, email)) {
+    const userID = generateRandomString();
+    req.session.user_id = userID;
+    users[userID] = { userID, email, password };
+    res.redirect(`/urls`);
+  }
+  res.send('ERROR 400: This email address corresponds to existing account, please try again with a different email');
+
 });
 
 app.listen(PORT, () => {
