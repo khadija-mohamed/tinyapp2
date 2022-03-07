@@ -8,7 +8,7 @@ const generateRandomString = function() {
 }
 return result
 }
-console.log(generateRandomString(5));
+console.log(generateRandomString(6));
 
 //get user by email stored in database
 const getUserByEmail = (database, email) => {
