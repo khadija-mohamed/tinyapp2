@@ -28,6 +28,13 @@ const users = {
     password: bcrypt.hashSync("password", 10)
   }
 };
+app.get("/", (req, res) => {
+  res.redirect(`/urls`);
+});
+
+app.get("/urls.json", (req, res) => {
+  res.json(urlDatabase);
+});
 
 // adding GET route for /urls
 app.get("/urls", (req, res) => {
