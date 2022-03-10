@@ -136,19 +136,22 @@ app.get("/register", (req, res) => {
 
 // post for /register endpoint with corresponding error messages, and redirections.
 app.post("/register", (req, res) => {
+  const userID = generateRandomString();
   const email = req.body.email;
-  const password = bcrypt.hashSync(req.body.password, 10);
-  if (!email || !password) {
-    res.status(400).send("ERROR 400: Email address or password entered is invalid, please try again");
-  }
-  if (!getUserByEmail(users, email)) {
-    const userID = generateRandomString();
-    req.session.user_id = userID;
-    users[userID] = { userID, email, password };
-    res.redirect(`/urls`);
-  }
-  res.send('ERROR 400: This email address corresponds to existing account, please try again with a different email');
+  const password = req.body.password;
+  console.log(email, password);
 
+  if (!email || !password || getUserByEmail(email, users)) {
+    res.status(400).send("ERROR 400: Email address or password entered is invalid, please try again");
+  } else {
+    req.session.user_id = userID;
+    const hashPassword = bcrypt.hashSync(req.body.password, 10);
+    users[userID] = { 
+      userID,
+      email, 
+      hashPassword };
+  }
+  res.redirect(`/urls`);
 });
 
 app.listen(PORT, () => {
