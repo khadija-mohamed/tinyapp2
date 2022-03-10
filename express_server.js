@@ -38,7 +38,7 @@ app.get("/urls.json", (req, res) => {
 
 // adding GET route for /urls
 app.get("/urls", (req, res) => {
-  let templateVars = { 
+  const templateVars = { 
     urls: urlDatabase,
     user: users[req.session.user_id]};
   res.render("urls_index", templateVars);
@@ -46,7 +46,7 @@ app.get("/urls", (req, res) => {
 
 // adding GET route for /urls/new
 app.get("/urls/new", (req, res) => {
-    let templateVars = { 
+    const templateVars = { 
       urls: urlDatabase,
       user: users[req.session.user_id]}
       if (templateVars.user) {
@@ -58,7 +58,7 @@ app.get("/urls/new", (req, res) => {
 // adding GET route for /urls:shortURL -- this renders information about a single URL
 app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL
-  let templateVars = { 
+  const templateVars = { 
     shortURL: req.params.shortURL, 
     longURL: urlDatabase[shortURL],
     user: users[req.session.user_id]};
@@ -81,7 +81,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 // adding POST route to update a URL resource 
 app.post("/urls/:id", (req, res) => {
-  let longURL = req.body.longURL
+  const longURL = req.body.longURL
   urlDatabase[req.params.id] = longURL 
   console.log(urlDatabase)
   res.redirect(`/urls`);
