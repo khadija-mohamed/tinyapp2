@@ -11,16 +11,39 @@ return result
 console.log(generateRandomString(6));
 
 //get user by email stored in database
-const getUserByEmail = (database, email) => {
-  let user = {};
-
-  for (let key in database) {
-    if (database[key]['email'] === email) {
-      user = database[key];
-      return user;
+const getUserByEmail = (email, database) => {
+  for (const user in database) {
+    if (database[user].email === email) {
+      return true;
     }
   }
-  return null;
 };
 
-module.exports = { generateRandomString, getUserByEmail };
+const userIdEmail = function(email, database) {
+  for (const key in database) {
+    if (database[key]['email'] === email) {
+      return database[key].id;
+    }
+  }
+};
+
+const usersUrls = (id, database) => {
+  const userUrls = {};
+  for (const shortURL in database) {
+    if (database[shortURL].userID === id) {
+      userUrls[shortURL] = database[shortURL];
+    }
+  }
+  return userUrls;
+};
+
+
+const userCookies = (cookie, database) => {
+  for (const user in database) {
+    if (cookie === user) {
+      return true;
+    }
+  }
+};
+
+module.exports = { generateRandomString, getUserByEmail, userIdEmail, usersUrls, userCookies };
