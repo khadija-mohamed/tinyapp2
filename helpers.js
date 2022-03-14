@@ -10,7 +10,7 @@ return result
 }
 console.log(generateRandomString(6));
 
-//get user by email stored in database
+//get user by email stored in database and return if true or false
 const getUserByEmail = (email, database) => {
   for (const user in database) {
     if (database[user].email === email) {
@@ -19,6 +19,7 @@ const getUserByEmail = (email, database) => {
   }
 };
 
+// get userid for email and return id
 const userIdEmail = function(email, database) {
   for (const key in database) {
     if (database[key]['email'] === email) {
@@ -27,6 +28,7 @@ const userIdEmail = function(email, database) {
   }
 };
 
+// get specific user url and return
 const usersUrls = (id, database) => {
   const userUrls = {};
   for (const shortURL in database) {
@@ -37,7 +39,7 @@ const usersUrls = (id, database) => {
   return userUrls;
 };
 
-
+// get cookies for respective user and return true
 const userCookies = (cookie, database) => {
   for (const user in database) {
     if (cookie === user) {
