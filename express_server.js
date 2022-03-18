@@ -4,7 +4,7 @@ const cookieSession = require("cookie-session");
 const bcrypt = require("bcryptjs");
 const app = express();
 const PORT = 8080;
-const { getUserByEmail, generateRandomString, userIdEmail, usersUrls, userCookies } = require('./helpers');
+const { generateRandomString, userIdEmail, usersUrls, userCookies } = require('./helpers');
 
 app.set("view engine", "ejs");
 
@@ -151,12 +151,12 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
 
-  if (!getUserByEmail(email, users)) {
+  if (!userIdEmail(email, users)) {
     res.status(403).send('ERROR 403: Email address is incorrect, please try again.');
   } else {
     const userID = userIdEmail(email, users);
     if (!bcrypt.compareSync(password, users[userID].password)) {
-      res.status(403).send('ERROR 403: Email address is incorrect, please try again.');
+      res.status(403).send('ERROR 403: Password is incorrect, please try again.');
     } else {
       req.session.user_id = userID;
       res.redirect("/urls");
@@ -177,7 +177,7 @@ app.post("/register", (req, res) => {
 
   if (!email || !password) {
     res.status(400).send("ERROR 400: Email address or password entered is invalid, please try again.");
-  } else if (getUserByEmail(email, users)) {
+  } else if (userIdEmail(email, users)) {
     res.status(400).send("ERROR 400: Email address or password entered is invalid, please try again.");
   } else {
     const newUserID = generateRandomString();
