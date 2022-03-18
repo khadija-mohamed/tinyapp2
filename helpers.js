@@ -20,7 +20,7 @@ const userIdEmail = function(email, database) {
 };
 
 // get specific user url and return
-const usersUrls = (id, database) => {
+const usersUrls = function(id, database) {
   const userUrls = {};
   for (const shortURL in database) {
     if (database[shortURL].userID === id) {
@@ -31,7 +31,7 @@ const usersUrls = (id, database) => {
 };
 
 // get cookies for respective user and return true
-const userCookies = (cookie, database) => {
+const userCookies = function(cookie, database) {
   for (const user in database) {
     if (cookie === user) {
       return true;
