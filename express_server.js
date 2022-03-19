@@ -30,13 +30,17 @@ app.get("/", (req, res) => {
   }
 });
 
-
 //adding GET route for /urls
 app.get("/urls", (req, res) => {
+  let user = req.session.user_id;
   let templateVars = {
     urls: usersUrls(req.session.user_id, urlDatabase),
     user: users[req.session.user_id],
   };
+
+  if (!user) {
+    res.status(401).send("Error 401: Please login or register before proceeding")
+  }
   res.render("urls_index", templateVars);
 });
 
@@ -54,7 +58,10 @@ app.get("/urls/new", (req, res) => {
 
 //adding GET route for /urls:shortURL -- this renders information about a single URL
 app.get("/urls/:shortURL", (req, res) => {
-  if (urlDatabase[req.params.shortURL]) {
+  let user = req.session.user_id;
+  let urlUserID = urlDatabase[req.params.shortURL].userID;
+
+  if (user === urlDatabase[req.params.shortURL].userID) {
     let templateVars = {
       shortURL: req.params.shortURL,
       longURL: urlDatabase[req.params.shortURL].longURL,
@@ -63,7 +70,7 @@ app.get("/urls/:shortURL", (req, res) => {
     };
     res.render("urls_show", templateVars);
   } else {
-    res.status(404).send("ERROR 404: The short URL is nonfunctional, please try again.");
+    res.status(404).send("ERROR 404: Please login to edit short urls.");
   }
 });
 
